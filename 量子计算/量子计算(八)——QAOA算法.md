@@ -126,7 +126,7 @@ $$
 
 显然一种求解此组合优化问题的方法就是从$\bm{\mathcal{H}}_{\mathcal{C}}$中找到最小的特征值，再以此求出对应特征向量。但必须指出，$\bm{\mathcal{H}}_{\mathcal{C}}$是$2^n$阶的，因此该方法并没有摆脱指数增长带来的困难。然而另一方面，对于一个哈密顿量，其最小特征值对应的特征向量正是量子系统的基态。因此，量子绝热算法基于量子绝热定理，通过设计一条演化路径，将一个易于制备基态的哈密顿量连续地演化为问题哈密顿量。若演化足够缓慢且满足绝热条件，最终系统将处于问题哈密顿量的基态，此时对该态进行测量，即可得到优化问题的解。而QAOA借鉴量子绝热算法，以参数化量子电路来分段近似模拟绝热演化。
 
-> **定理：量子绝热定理**  
+> **定理（量子绝热定理）**  
 > 对于一个缓慢变化的、无简并的哈密顿量，如果系统初始处于其基态或某个瞬时能级的本征态，则系统在随时间演化的过程中将始终保持在相应的瞬时能级态上，而不会跃迁到其他能级。 
 
 ## 三、分段近似模拟绝热演化
@@ -174,11 +174,13 @@ $$
 \end{align}
 $$
 这说明混合酉算子$U(\bm{\mathcal{H}}_{B}, \beta)$的作用就是在每一个量子比特上都作用一个$RX(2\beta)$门，如图\ref{fig:chap9-MixerUnitaryOperatorEffect}所示。$RX(\theta)$门是：
+$$
 \begin{equation}
     RX(\theta) = \begin{bmatrix}
         \cos\frac{\theta}{2} & -\mathrm{i}\sin\frac{\theta}{2} \\ -\mathrm{i}\sin\frac{\theta}{2} & \cos\frac{\theta}{2}
     \end{bmatrix}
 \end{equation}
+$$
 因此，在量子电路图\ref{fig:chap9-QAOAGlobal}中，唯一会随着问题而变的结构是问题酉算子$U(\bm{\mathcal{H}}_{\mathcal{C}}, \gamma_*)$，故只要研究清楚问题哈密顿量$\bm{\mathcal{H}}_{\mathcal{C}}$会如何构建量子电路，QAOA的电路构建就手到擒来了。
 
 \begin{figure}[htbp]
@@ -199,82 +201,86 @@ $$
 \end{figure}
 
 观察式~\eqref{eq:chap9-QuestionHamiltonian}，注意到$\{ \bm{I}, \bm{Z} \}^{\otimes n}$中的矩阵是两两对易的，因此在式(14)中代入问题哈密顿量$\bm{\mathcal{H}}_{\mathcal{C}}$与其对应角度参数$\gamma$即得：
-\begin{subequations}
+$$
 \begin{align}
     U(\bm{\mathcal{H}}_{\mathcal{C}}, \gamma) &= \mathrm{e}^{-\mathrm{i}\gamma \sum_{\delta} h_{\delta}\bigotimes_{i=1}^{n}\bm{Z}_i^{\delta_i}} \\
-    &= \prod_{\delta} \mathrm{e}^{-\mathrm{i} (h_\delta\gamma) \bigotimes_{i=1}^{n}\bm{Z}_i^{\delta_i}}. \label{eq:chap9-QuestionUnitaryOperatorEffectWithCoeffientB}
+    &= \prod_{\delta} \mathrm{e}^{-\mathrm{i} (h_\delta\gamma) \bigotimes_{i=1}^{n}\bm{Z}_i^{\delta_i}}.
 \end{align}
-\end{subequations}
+$$
 显然可以认为系数是角度参数的一部分，之后再回过头来处理。上式主要透露出的信息是：只需要考虑$\mathrm{e}^{-\mathrm{i} \gamma \bigotimes_{i=1}^{n}\bm{Z}_i^{\delta_i}}$最终能转换成什么电路，就解决了QAOA整体电路构建的问题。现给出以下定理：
 
-\begin{theorem}[$Z_{i_1}$与$Z_{i_1}\otimes Z_{i_2}$对应的酉算子及其量子电路]
-\label{theo:chap9-SingleCoupleFoldZGate->QuantumCircuit}
-    若算子$\bm{\mathcal{H}} = \bm{Z}_{i_1}$，那么其对应酉算子是$U(\bm{\mathcal{H}}, \gamma) = \mathrm{e}^{-\mathrm{i} \gamma \bm{Z}_{i_1}} = RZ_{i_1}(2\gamma)$，即在第$i_1$量子比特上作用$RZ(2\gamma)$门，如图\ref{fig:chap9-SingleCoupleFoldZGate->QuantumCircuit}之左图所示。$RZ(\theta)$门是：
-    \begin{equation}
-        RZ(\theta) = \begin{bmatrix}
-            \mathrm{e}^{-\mathrm{i}\frac{\theta}{2}} & 0 \\ 0 & \mathrm{e}^{\mathrm{i}\frac{\theta}{2}}
-        \end{bmatrix}
-    \end{equation}
+> **定理 ($Z_{i_1}$与$Z_{i_1}\otimes Z_{i_2}$对应的酉算子及其量子电路)：**  
+> 若算子$\bm{\mathcal{H}} = \bm{Z}_{i_1}$，那么其对应酉算子是$U(\bm{\mathcal{H}}, \gamma) = \mathrm{e}^{-\mathrm{i} \gamma \bm{Z}_{i_1}} = RZ_{i_1}(2\gamma)$，即在第$i_1$量子比特上作用$RZ(2\gamma)$门，如下左图所示。$RZ(\theta)$门是：
+> $$
+> RZ(\theta) = \begin{bmatrix}
+>     \mathrm{e}^{-\mathrm{i}\frac{\theta}{2}} & 0 \\ 0 & \mathrm{e}^{\mathrm{i}\frac{\theta}{2}}
+> \end{bmatrix}
+> $$
+> 若算子$\bm{\mathcal{H}} = \bm{Z}_{i_1}\otimes Z_{i_2}$，那么其对应酉算子是$\mathrm{e}^{-\mathrm{i} \gamma \bm{Z}_{i_1}\otimes Z_{i_2}} = \text{CNOT}_{i_2}^{i_1}\cdot RZ_{i_2}(2\gamma)\cdot \text{CNOT}_{i_2}^{i_1}$，其量子电路如下右图所示，$\text{CNOT}_{i_2}^{i_1}$表示以第$i_1$量子比特为控制位、第$i_2$量子比特为受控位。
+> **电路示意：**
+> 左图（单比特 $RZ$）：  
+> ```
+> q_i1: ── RZ(2γ) ──
+> ```
+> 右图（双比特 $ZZ$ 演化）：  
+> ```
+> q_i1: ── ● ──────────── ● ──
+>          │               │
+> q_i2: ── ⊕ ── RZ(2γ) ── ⊕ ──
+> ```
+> （其中 ● 表示控制位，⊕ 表示受控非门目标位）
+> **图：** $Z_{i_1}$与$Z_{i_1}\otimes Z_{i_2}$对应的量子电路
 
-    若算子$\bm{\mathcal{H}} = \bm{Z}_{i_1}\otimes Z_{i_2}$，那么其对应酉算子是$\mathrm{e}^{-\mathrm{i} \gamma \bm{Z}_{i_1}\otimes Z_{i_2}} = \text{CNOT}_{i_2}^{i_1}\cdot RZ_{i_2}(2\gamma)\cdot \text{CNOT}_{i_2}^{i_1}$，其量子电路如图\ref{fig:chap9-SingleCoupleFoldZGate->QuantumCircuit}之右图所示，$\text{CNOT}_{i_2}^{i_1}$表示以第$i_1$量子比特为控制位、第$i_2$量子比特为受控位。
-    \begin{center}
-    \begin{quantikz}[column sep=0.4cm]
-        \lstick{$q_{i_1}$} & \gate{RZ(2\gamma)} & 
-    \end{quantikz} \qquad \begin{quantikz}[column sep=0.4cm]
-        \lstick{$q_{i_1}$} & \ctrl{1} & & \ctrl{1} & \\
-        \lstick{$q_{i_2}$} & \targ{} & \gate{RZ(2\gamma)} & \targ{} & 
-    \end{quantikz}
-    \captionof{figure}{$Z_{i_1}$与$Z_{i_1}\otimes Z_{i_2}$对应的量子电路}
-    \label{fig:chap9-SingleCoupleFoldZGate->QuantumCircuit}
-    \end{center}
-\end{theorem}
-
-\begin{proof}
-    首先当$\bm{\mathcal{H}} = \bm{Z}$时做如下计算：
-    \begin{subequations}
-    \begin{align}
-        U(\bm{\mathcal{H}}, \gamma) &= \mathrm{e}^{-\mathrm{i} \gamma \bm{Z}} \\
-        &= \cos(\beta)\bm{I} - \mathrm{i}\sin(\beta)\bm{Z} \\
-        &= \diag{\mathrm{e}^{-\mathrm{i}\gamma}, \mathrm{e}^{\mathrm{i}\gamma}} \\
-        &= RZ(2\gamma) 
-    \end{align}
-    \end{subequations}
-    在考虑将要作用到的量子比特后，易证定理的第一部分。而当$\bm{\mathcal{H}} = \bm{Z}\otimes Z$时，计算如下：
-    \begin{subequations}
-    \begin{align}
-        U(\bm{\mathcal{H}}, \gamma) &= \mathrm{e}^{-\mathrm{i} \gamma \bm{Z}\otimes \bm{Z}} \\
-        &= \diag{ -\mathrm{e}^{\mathrm{i}\gamma}, \mathrm{e}^{\mathrm{i}\gamma}, \mathrm{e}^{\mathrm{i}\gamma}, \mathrm{e}^{-\mathrm{i}\gamma} } \\
-        &= \text{CNOT}\cdot RZ(2\gamma)\cdot \text{CNOT}
-    \end{align}
-    \end{subequations}
-    在考虑将要作用到的量子比特后定理第二部分得证。
-\end{proof}
+> **证明：**  
+> 首先当$\bm{\mathcal{H}} = \bm{Z}$时做如下计算：
+> $$
+> \begin{aligned}
+> U(\bm{\mathcal{H}}, \gamma) &= \mathrm{e}^{-\mathrm{i} \gamma \bm{Z}} \\
+> &= \cos(\gamma)\bm{I} - \mathrm{i}\sin(\gamma)\bm{Z} \\
+> &= \operatorname{diag}\{\mathrm{e}^{-\mathrm{i}\gamma}, \mathrm{e}^{\mathrm{i}\gamma}\} \\
+> &= RZ(2\gamma) 
+> \end{aligned}
+> $$
+> 在考虑将要作用到的量子比特后，易证定理的第一部分。而当$\bm{\mathcal{H}} = \bm{Z}\otimes Z$时，计算如下：
+> $$
+> \begin{aligned}
+> U(\bm{\mathcal{H}}, \gamma) &= \mathrm{e}^{-\mathrm{i} \gamma \bm{Z}\otimes \bm{Z}} \\
+> &= \operatorname{diag}\{ -\mathrm{e}^{\mathrm{i}\gamma}, \mathrm{e}^{\mathrm{i}\gamma}, \mathrm{e}^{\mathrm{i}\gamma}, \mathrm{e}^{-\mathrm{i}\gamma} \} \\
+> &= \text{CNOT}\cdot RZ(2\gamma)\cdot \text{CNOT}
+> \end{aligned}
+> $$
+> 在考虑将要作用到的量子比特后定理第二部分得证。 ∎
 
 必须指出，图\ref{fig:chap9-SingleCoupleFoldZGate->QuantumCircuit}中的$q_{i_1}$与$q_{i_2}$并不一定是相邻的，$i_1,i_2$的取值只取决于式\eqref{eq:chap9-QuestionHamiltonian}中的$\delta$。由此定理得到以下推论：
 
-\begin{corollary}[$\bigotimes_{k=1}^{n} Z_{i_k}$对应的酉算子及其量子电路]
-\label{coro:chap9-MultiFoldZGate->QuantumCircuit}
-    若算子$\bm{\mathcal{H}} = \bigotimes_{k=1}^{n} Z_{i_k}$，那么其对应酉算子$U(\bm{\mathcal{H}}, \gamma)$的量子电路如式\eqref{eq:chap9-MultiFoldZGate->QuantumCircuit}和图\ref{fig:chap9-MultiFoldZGate->QuantumCircuit}所示。
-    \begin{equation}
-        \left( \prod_{k=1}^{n-1}\text{CNOT}_{i_n}^{i_k} \right)\cdot RZ_{i_n}(2\gamma)\cdot \left( \prod_{k=1}^{n-1}\text{CNOT}_{i_n}^{i_{n-k}} \right)
-        \label{eq:chap9-MultiFoldZGate->QuantumCircuit}
-    \end{equation}
-    \begin{center}
-    \begin{quantikz}[column sep=0.2cm]
-        \lstick{$q_{i_1}$} & \ctrl{4} &  &  &  &  &  &  &  &  &  &  &  & \ctrl{4} & \\
-        \lstick{$q_{i_2}$} &  & \ctrl{3} &  &  &  &  &  &  &  &  &  & \ctrl{3} &  & \\
-        \lstick{\vdots} \wave &&&&&&&&&&&&&& \\
-        \lstick{$q_{i_{n-1}}$} &  &  &  & \ \ldots\  & & \ctrl{1} &  & \ctrl{1} &  & \ \ldots\  & &  &  & \\
-        \lstick{$q_{i_n}$} & \targ{} & \targ{} &  & \ \ldots\  & & \targ{} & \gate{RZ\left(2\gamma\right)} & \targ{} &  & \ \ldots\  & & \targ{} & \targ{} &  
-    \end{quantikz}
-    \captionof{figure}{$\bigotimes_{k=1}^{n} Z_{i_k}$对应的量子电路}
-    \label{fig:chap9-MultiFoldZGate->QuantumCircuit}
-    \end{center}
-\end{corollary}
+> **推论 ($\bigotimes_{k=1}^{n} Z_{i_k}$对应的酉算子及其量子电路)：**  
+> 若算子$\bm{\mathcal{H}} = \bigotimes_{k=1}^{n} Z_{i_k}$，那么其对应酉算子$U(\bm{\mathcal{H}}, \gamma)$的量子电路如下式及下图所示。
+> $$
+> \left( \prod_{k=1}^{n-1}\text{CNOT}_{i_n}^{i_k} \right)\cdot RZ_{i_n}(2\gamma)\cdot \left( \prod_{k=1}^{n-1}\text{CNOT}_{i_n}^{i_{n-k}} \right)
+> $$
+> **电路示意（$n$比特情况）：**
+> ```
+> q_i1:  ── ● ──────────────────────────── ● ──
+>           │                               │
+> q_i2:  ── ┼── ● ────────────────────── ● ──┼──
+>           │    │                         │  │
+> q_i3:  ── ┼── ┼── ● ──────────────── ● ──┼──┼──
+>           │    │    │                 │   │  │
+>          ...  ...  ...  ...  ...  ... ... ... ...
+>           │    │    │                 │   │  │
+> q_i{n-1}: ── ┼── ┼── ┼── ● ──────── ● ──┼──┼──┼──
+>           │    │    │    │         │   │  │  │
+> q_i{n}:  ── ⊕── ⊕── ⊕── ⊕── RZ(2γ) ── ⊕── ⊕── ⊕── ⊕──
+> ```
+> 其中：
+> - 最底部线路为$q_{i_n}$（受控目标比特）
+> - 上方各线路为控制比特$q_{i_1}, q_{i_2}, \dots, q_{i_{n-1}}$
+> - ● 表示控制位，⊕ 表示CNOT的目标位
+> - 电路结构：先将所有上方比特作为控制位，依次对$q_{i_n}$作用CNOT门；然后在$q_{i_n}$上作用$RZ(2\gamma)$门；最后再用相同的CNOT序列（顺序相反）进行还原。
+> **图：** $\bigotimes_{k=1}^{n} Z_{i_k}$对应的量子电路
 
-\begin{proof}
-    证明留给读者作为习题。提示：使用数学归纳法。
-\end{proof}
+> **证明：**  
+> 证明留给读者作为习题。提示：使用数学归纳法。 ∎
 
 由定理\ref{theo:chap9-SingleCoupleFoldZGate->QuantumCircuit}，任意QUBO问题都能轻易地转化为QAOA量子电路了；进一步地，由推论\ref{coro:chap9-MultiFoldZGate->QuantumCircuit}，任意PUBO问题也能转化为量子电路。但千万别忘了：QAOA的终态$\ket{\bm{\gamma}, \bm{\beta}}$是由$\bm{\gamma}, \bm{\beta}$中共$2p$个角度参数决定的，这些参数直接影响了算法对量子绝热过程的近似模拟的好坏。因此QAOA的下一步，是寻找到一组足够好的参数、以尽可能地模拟真实的量子绝热过程，或者说输出足够好的结果。
 
